@@ -2,11 +2,23 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/pluralsight/gobigpicture/module"
 )
 
 func main() {
+
+	user := module.User{
+		Id:        0,
+		FirstName: "tris",
+		LastName:  "mack",
+	}
+
+	fmt.Println(user)
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		names := r.URL.Query()["name"]
 		var name string
