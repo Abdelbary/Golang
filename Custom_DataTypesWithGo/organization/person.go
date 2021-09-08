@@ -6,37 +6,96 @@ import (
 	"strings"
 )
 
+type TwitterHandler string
+
 type Identifiable interface {
 	ID() string
 }
+type Citizen interface {
+	Identifiable
+	Country() string
+}
+type Name struct {
+	firstName string
+	lastName  string
+}
+
+type Employee struct {
+	Name
+}
 
 type Person struct {
-	firstName      string
-	lastName       string
-	twitterHandler string
+	Name
+	twitterHandler TwitterHandler
+	Citizen
 }
 
-func (p Person) ID() string {
+type socialSecurityNumber string
+
+func NewSocialSecurityNumber(value string) Citizen {
+	return socialSecurityNumber(value)
+}
+func (ssn socialSecurityNumber) ID() string {
+	return string(ssn)
+}
+
+func (ssn socialSecurityNumber) Country() string {
+	return "United States"
+}
+
+type eurpianUnionIdentifier struct {
+	id      string
+	country string
+}
+
+func NewEuropianUnionIdentifier(id, country string) Citizen {
+	return eurpianUnionIdentifier{
+		id:      id,
+		country: country,
+	}
+}
+func (euID eurpianUnionIdentifier) ID() string {
+	return string(euID.id)
+}
+
+func (euID eurpianUnionIdentifier) Country() string {
+	return "Eurpian Union"
+}
+
+/*
+func (p *Person) ID() string {
 	return "123"
 }
-
-func NewPerson(firstName string, lastName string) Person {
-	return Person{firstName, lastName, ""}
+*/
+func NewPerson(firstName string, lastName string, citizen Citizen) Person {
+	return Person{
+		Name: Name{
+			firstName: firstName,
+			lastName:  lastName},
+		twitterHandler: "",
+		Citizen:        citizen,
+	}
 }
 
-func (p Person) FullName() string {
-	return fmt.Sprintf("%s %s\n", p.firstName, p.lastName)
+func (name *Name) FullName() string {
+	return fmt.Sprintf("%s %s\n", name.firstName, name.lastName)
 }
 
-func (p *Person) SetTwitterHandler(twitterHandler string) error {
-	if !strings.HasPrefix(twitterHandler, "@") {
+func (p *Person) SetTwitterHandler(th TwitterHandler) error {
+	if !strings.HasPrefix(string(th), "@") {
 		return errors.New("twitter handler must start with @ symbol")
 	}
 
-	p.twitterHandler = twitterHandler
+	p.twitterHandler = th
 	return nil
 }
 
-func (p Person) GetTwitterHandler() string {
+func (p *Person) GetTwitterHandler() TwitterHandler {
 	return p.twitterHandler
+}
+
+func (th TwitterHandler) GetRedirectURL() string {
+	cleanHandler := strings.TrimPrefix(string(th), "@")
+
+	return fmt.Sprintf("https://www.twitter.com/%s", cleanHandler)
 }
